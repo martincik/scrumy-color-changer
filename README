@@ -1,0 +1,29 @@
+== Synopsis 
+  Simple scrapping script to help users select their favorit color for Scrumy.com
+
+	WARNING: You're not probably allowed to do that, but I'm not sure!! I wrote this only as example.
+
+== Examples
+  This command does blah blah blah.
+    ./scc 'scrumy_board_name' 'mySecretpassword3' 'Patryk' 'white'
+
+  Other examples:
+    ./scc --verbose 'mySecretpassword3' 'Patryk' 'white'
+
+== Usage 
+  ./scc [options] your_scumy_board_name password user color
+
+  For help use: ./scc -h
+
+== Options
+  -h, --help          Displays help message
+  -v, --version       Display the version, then exit
+  -V, --verbose       Verbose output
+  -c, --colors        List possible colors
+
+== Author
+  Ladislav Martincik <ladislav.martincik@gmail.com>
+
+== Copyright
+  Copyright (c) 2007 Ladislav Martincik. Licensed under the MIT License:
+  http://www.opensource.org/licenses/mit-license.php
