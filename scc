@@ -1,0 +1,130 @@
+#!/usr/bin/env ruby
+
+# == Synopsis 
+#   Simple scrapping script to help users select their favorit color for Scrumy.com
+#
+# == Examples
+#   This command does blah blah blah.
+#     ./scc 'scrumy_board_name' 'mySecretpassword3' 'Patryk' 'white'
+#
+#   Other examples:
+#     ./scc --verbose 'mySecretpassword3' 'Patryk' 'white'
+#
+# == Usage 
+#   ./scc [options] your_scumy_board_name password user color
+#
+#   For help use: ./scc -h
+#
+# == Options
+#   -h, --help          Displays help message
+#   -v, --version       Display the version, then exit
+#   -V, --verbose       Verbose output
+#   -c, --colors        List possible colors
+#
+# == Author
+#   Ladislav Martincik <ladislav.martincik@gmail.com>
+#
+# == Copyright
+#   Copyright (c) 2007 Ladislav Martincik. Licensed under the MIT License:
+#   http://www.opensource.org/licenses/mit-license.php
+
+require 'optparse' 
+require 'rdoc/usage'
+require 'ostruct'
+require 'date'
+require 'scrumy_change_color'
+
+class App
+  VERSION = '0.0.1'
+  
+  attr_reader :options
+
+  def initialize(arguments, stdin)
+    @arguments = arguments
+    @stdin = stdin
+    
+    # Set defaults
+    @options = OpenStruct.new
+    @options.verbose = false
+    @options.list_colors = false
+  end
+
+  # Parse options, check arguments, then process the command
+  def run
+    unless parsed_options? && arguments_valid? 
+      output_usage and return
+    end
+    
+    puts "Start at #{DateTime.now}\n\n" if @options.verbose
+    
+    output_options if @options.verbose # [Optional]
+          
+    process_arguments            
+    process_command
+    
+    puts "\nFinished at #{DateTime.now}" if @options.verbose
+  end
+  
+  protected
+  
+    def parsed_options?      
+      opts = OptionParser.new 
+      opts.on('-v', '--version')    { output_version ; exit 0 }
+      opts.on('-h', '--help')       { output_help }
+      opts.on('-V', '--verbose')    { @options.verbose = true }  
+      opts.on('-c', '--colors')     { @options.list_colors = true }  
+            
+      opts.parse!(@arguments) rescue return false
+      
+      process_options
+      true      
+    end
+
+    # Performs post-parse processing on options
+    def process_options
+      puts ScrumyChangeColor::ALLOWED_COLORS.join(', ') if @options.list_colors
+    end
+    
+    def output_options
+      puts "Options:\n"
+      
+      @options.marshal_dump.each do |name, val|        
+        puts "  #{name} = #{val}"
+      end
+    end
+
+    # True if required arguments were provided
+    def arguments_valid?
+      true if @arguments.length == 4
+    end
+    
+    # Setup the arguments
+    def process_arguments
+      @scrumy_board = @arguments[0]
+      @password = @arguments[1]
+      @user = @arguments[2]
+      @color = @arguments[3]
+    end
+    
+    def output_help
+      output_version
+      RDoc::usage() #exits app
+    end
+    
+    def output_usage
+      RDoc::usage('usage') # gets usage from comments above
+    end
+    
+    def output_version
+      puts "#{File.basename(__FILE__)} version #{VERSION}"
+    end
+    
+    def process_command
+      scrumy_change_color = ScrumyChangeColor.new(@scrumy_board, @password, @user, @color)
+      scrumy_change_color.change
+    end
+end
+
+# Create and run the application
+app = App.new(ARGV, STDIN)
+app.run
